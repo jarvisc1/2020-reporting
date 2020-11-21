@@ -1,4 +1,4 @@
-## Name: run_simulations.R
+## Name: 01_simulate_outbreaks.R
 ## Description: Simulate outbreaks 
 ## Input file: none
 ## Functions: 
