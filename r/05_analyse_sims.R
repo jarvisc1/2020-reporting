@@ -8,9 +8,9 @@
 library(dplyr)
 library(ggplot2)
 library(ggthemr)
+library(tidyr)
 
 # library(binom)
-# library(tidyr)
 
 
 # Source user written scripts ---------------------------------------------
@@ -65,7 +65,7 @@ fig1 <- ggplot(simdf) +
         text = element_text( size = 14)
   )
 
-ggsave(fig1, filename = "outputs/figure_1.png", height = 10, width = 8)
+ggsave(fig1, filename = "outputs/figure_1.png", height = 10, width = 12)
 
 
 # Zip plots ---------------------------------------------------------------
@@ -123,7 +123,7 @@ fig2 <- zip_data %>%
         plot.subtitle = element_text(hjust = 0.5, vjust = -0.1)
   )
 
-ggsave(fig2, filename = "outputs/figure_2.png", height = 10, width = 8)
+ggsave(fig2, filename = "outputs/figure_2.png", height = 10, width = 12)
 
 
 # Performance measures tables ---------------------------------------------
@@ -204,7 +204,6 @@ measures_df <- pmeasures %>%
          model_ratio
   )
 
-
 measures_table <- measures_df %>% 
   pivot_longer(cols = 
                  -one_of(c("true_value", "reported_outbreak_bins")),
@@ -217,8 +216,9 @@ measures_table$measure <- gsub("_", " ",
                                paste0(measures_table$measure))
 
 
-measures_table
+tail(measures_table,20)
 
+write.csv(measures_table, file = "outputs/Table3.csv")
 
 # Operational table -------------------------------------------------------
 
@@ -232,41 +232,15 @@ sumprop <- function(a){
   }
 }
 
-
-simdf %>% 
+simdf
+absdiff <- simdf %>% 
   group_by(true_value, reported_outbreak_bins) %>% 
-  summarise(est_15 =    sumprop(est_15diff),
-            est_20 =    sumprop(est_20diff),
-            est_ci_15 = sumprop(est_ci_15diff),
-            est_ci_20 = sumprop(est_ci_20diff)
+  summarise(est_05 =    sumprop(est_05diff),
+            est_10 =    sumprop(est_10diff),
+            est_25 =    sumprop(est_25diff),
+            est_50 =    sumprop(est_50diff),
   ) 
-# kable(col.names = c("True reporting",
-#                     "Reported outbreak size",
-#                     "15% different",
-#                     "20% different",
-#                     "15% different",
-#                     "20% different")) %>% 
-# kable_styling(bootstrap_options = c("striped", "hover")) %>% 
-# collapse_rows(columns = 1, valign = "middle") %>% 
-# add_header_above(c("","",
-#                    "Estimate" = 2, 
-#                    "Confidence interval" = 2)) %>% 
-# add_header_above(c("","",
-#                    "Absolute difference from true value" = 4))
 
-simdf %>% 
-  group_by(reported_outbreak_bins) %>% 
-  summarise(est_15 =    sumprop(est_15diff),
-            est_20 =    sumprop(est_20diff),
-            est_ci_15 = sumprop(est_ci_15diff),
-            est_ci_20 = sumprop(est_ci_20diff)
-  )
 
-simdf %>% 
-  group_by(true_value) %>% 
-  summarise(est_15 =    sumprop(est_15diff),
-            est_20 =    sumprop(est_20diff),
-            est_ci_15 = sumprop(est_ci_15diff),
-            est_ci_20 = sumprop(est_ci_20diff)
-  )
+write.csv(absdiff, file = "outputs/Table4.csv")
 
