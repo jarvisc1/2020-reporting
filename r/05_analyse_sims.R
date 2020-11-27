@@ -30,7 +30,7 @@ pmeasures <- all[[2]]
 
 fig1 <- ggplot(simdf) +
   scale_colour_manual(values = true_val_col) +
-  scale_x_continuous(breaks = c(0.00, 0.25, 0.50, 0.75, 1.00)) + 
+  scale_x_continuous(breaks = c(0.00, 0.25, 0.50, 0.75, 1.00), expand=expansion(0)) + 
   geom_jitter(aes(x = estimated_reporting_probability,
                   y = reported_outbreak_bins,
                   col = true_under_reporting),
@@ -92,7 +92,8 @@ fig2 <- zip_data %>%
   geom_segment(aes(yend = row_number, xend = reporting_conf_high)) +
   facet_grid(true_value_zip ~ reported_outbreak_bins, ) +
   scale_y_continuous(labels = function(x) x/2000, 
-                     breaks = c(0.05*2000, 0.5*2000, 0.95*2000)) + 
+                     breaks = c(0.05*2000, 0.5*2000, 0.95*2000),
+                     expand=expansion(0)) + 
   scale_x_continuous(breaks = c(0.25, 0.50, 0.75)) + 
   geom_vline(aes(xintercept = true_value), col = "white") + 
   labs(subtitle = "Reported outbreak size") +
@@ -121,7 +122,7 @@ fig2 <- zip_data %>%
         panel.spacing.y=unit(0.5, "lines"),
         strip.text.y = element_text(angle = 0, vjust = 0.75, hjust = 0),
         plot.subtitle = element_text(hjust = 0.5, vjust = -0.1)
-  )
+  ) 
 
 ggsave(fig2, filename = "outputs/figure_2.png", height = 10, width = 12)
 
@@ -235,12 +236,177 @@ sumprop <- function(a){
 simdf
 absdiff <- simdf %>% 
   group_by(true_value, reported_outbreak_bins) %>% 
-  summarise(est_05 =    sumprop(est_05diff),
-            est_10 =    sumprop(est_10diff),
-            est_25 =    sumprop(est_25diff),
-            est_50 =    sumprop(est_50diff),
+  summarise(
+    est_05 =    sumprop(est_05above),
+    est_10 =    sumprop(est_10above),
+    est_15 =    sumprop(est_15above),
+    est_20 =    sumprop(est_20above),
+    est_25 =    sumprop(est_25above),
+    est_50 =    sumprop(est_50above),
+            
   ) 
 
 
 write.csv(absdiff, file = "outputs/Table4.csv")
+
+
+
+
+# Operational figure -------------------------------------------------------
+
+
+## Plot of estimates within x% of true value
+
+
+absdiffplot <- simdf %>% 
+  group_by(true_value, reported_outbreak_bins) %>% 
+  summarise(
+    `0.05` =    sum(est_05within)/n(),
+    `0.10` =    sum(est_10within)/n(),
+    `0.15` =    sum(est_15within)/n(),
+    `0.20` =    sum(est_20within)/n()
+    # est_25n =    sum(est_25diff)/n(),
+    # est_50n =    sum(est_50diff)/n(),
+    
+  ) 
+
+
+
+absdiff_long <- absdiffplot %>% pivot_longer(cols = c(starts_with("0."))) %>% 
+  mutate(name = as.numeric(name),
+         value = round(value , 2))
+
+
+ggplot(absdiff_long) +
+  geom_col(aes(x= reported_outbreak_bins, value)) +
+  facet_grid(true_value  ~ name, scales = "free") +
+  scale_y_continuous(expand=expansion(0))
+
+
+simdf$bias_abs <- abs(simdf$bias)
+
+ggplot(simdf) +
+  scale_colour_manual(values = true_val_col) +
+  scale_x_continuous(breaks = c(0.00, 0.05, 0.10, 0.15, 0.20, 0.25, 0.5), expand=expansion(0)) + 
+  geom_jitter(aes(x = bias_abs,
+                  y = reported_outbreak_bins,
+                  col = true_under_reporting),
+              alpha = 0.06, height = 0.10) +
+  geom_text(data = absdiff_long, aes(y = reported_outbreak_bins, x = name, label = value), nudge_y = 0.3, nudge_x = -0.01) +
+  facet_grid(true_value ~ .) +
+  # geom_point(data = absdiff_long, 
+  #            aes(x = name, 
+  #                y = value),
+  #            col = "darkred", shape = "|", size = 2) +
+  ylab("Reported outbreak size") +
+  xlab("Estimated reporting") +
+  guides(colour = guide_legend(title = "True reporting",
+                               override.aes = list(alpha = 1, size = 5),
+                               byrow = TRUE,
+                               direction = "horizontal",
+                               title.position = "left",
+                               label.position = "left", keywidth = 0.1,
+  )) +
+  theme(legend.text= element_text( size = 14),
+        legend.position = c(0.7, 0.96),
+        legend.box.background = element_blank(),
+        legend.background = element_blank(),
+        legend.key = element_blank(),
+        legend.spacing.x = unit(0.1, "cm"),
+        panel.grid.major.y = element_blank(),
+        panel.grid.major.x = element_line(size = .1, color = "grey"),
+        text = element_text( size = 14)
+  )
+
+## Repeat about but do above instead of within
+
+absdiffplot <- simdf %>% 
+  group_by(true_value, reported_outbreak_bins) %>% 
+  summarise(
+    `0.05` =    sum(est_05above)/n(),
+    `0.10` =    sum(est_10above)/n(),
+    `0.15` =    sum(est_15above)/n(),
+    `0.20` =    sum(est_20above)/n()
+    # est_25n =    sum(est_25diff)/n(),
+    # est_50n =    sum(est_50diff)/n(),
+    
+  ) 
+
+
+
+absdiff_long <- absdiffplot %>% pivot_longer(cols = c(starts_with("0."))) %>% 
+  mutate(name = as.numeric(name),
+         value = round(value , 2))
+
+
+ggplot(absdiff_long) +
+  geom_col(aes(x= reported_outbreak_bins, value)) +
+  facet_grid(true_value  ~ name, scales = "free") +
+  scale_y_continuous(expand=expansion(0))
+
+
+simdf$bias_abs <- abs(simdf$bias)
+
+ggplot(simdf) +
+  scale_colour_manual(values = true_val_col) +
+  scale_x_continuous(breaks = c(0.00, 0.05, 0.10, 0.15, 0.20, 0.25, 0.5), expand=expansion(0)) + 
+  geom_jitter(aes(x = bias_abs,
+                  y = reported_outbreak_bins,
+                  col = true_under_reporting),
+              alpha = 0.06, height = 0.10) +
+  geom_text(data = absdiff_long, aes(y = reported_outbreak_bins, x = name, label = value), nudge_y = 0.3, nudge_x = 0.01) +
+  facet_grid(true_value ~ .) +
+  # geom_point(data = absdiff_long, 
+  #            aes(x = name, 
+  #                y = value),
+  #            col = "darkred", shape = "|", size = 2) +
+  ylab("Reported outbreak size") +
+  xlab("Estimated reporting") +
+  guides(colour = guide_legend(title = "True reporting",
+                               override.aes = list(alpha = 1, size = 5),
+                               byrow = TRUE,
+                               direction = "horizontal",
+                               title.position = "left",
+                               label.position = "left", keywidth = 0.1,
+  )) +
+  theme(legend.text= element_text( size = 14),
+        legend.position = c(0.7, 0.96),
+        legend.box.background = element_blank(),
+        legend.background = element_blank(),
+        legend.key = element_blank(),
+        legend.spacing.x = unit(0.1, "cm"),
+        panel.grid.major.y = element_blank(),
+        panel.grid.major.x = element_line(size = .1, color = "grey"),
+        text = element_text( size = 14)
+  )
+
+
+
+# Heatmap -----------------------------------------------------------------
+
+
+absdiffplot <- simdf %>% 
+  group_by(true_value, reported_outbreak_bins) %>% 
+  summarise(
+    `0.05` =    sum(est_05within)/n(),
+    `0.10` =    sum(est_10within)/n(),
+    `0.15` =    sum(est_15within)/n(),
+    `0.20` =    sum(est_20within)/n(),
+    `0.21` =    sum(est_20above)/n()
+    # est_25n =    sum(est_25diff)/n(),
+    # est_50n =    sum(est_50diff)/n(),
+    
+  ) 
+
+
+absdiff_long <- absdiffplot %>% pivot_longer(cols = c(starts_with("0."))) %>% 
+  mutate(name = as.numeric(name)) %>% 
+  mutate(name = factor(name))
+  
+
+ggplot(absdiff_long) +
+  geom_tile(aes(x = name, reported_outbreak_bins, fill = value)) +
+  facet_grid(true_value ~.)
+
+
 

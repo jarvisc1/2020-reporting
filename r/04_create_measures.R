@@ -32,10 +32,18 @@ simdf <- simdf %>%
     true_under_reporting = factor(true_value, 
                                   levels = c("0.25", "0.5", "0.75"),
                                   labels = c("0.25", "0.50", "0.75")),
-    est_05diff = bias > 0.05,
-    est_10diff = bias > 0.10,
-    est_25diff = bias > 0.25,
-    est_50diff = bias > 0.50,
+    est_05within = abs(bias) <= 0.05,
+    est_10within = abs(bias) <= 0.10,
+    est_15within = abs(bias) <= 0.15,
+    est_20within = abs(bias) <= 0.20,
+    est_25within = abs(bias) <= 0.25,
+    est_50within = abs(bias) <= 0.50,
+    est_05above = abs(bias) > 0.05,
+    est_10above = abs(bias) > 0.10,
+    est_15above = abs(bias) > 0.15,
+    est_20above = abs(bias) > 0.20,
+    est_25above = abs(bias) > 0.25,
+    est_50above = abs(bias) > 0.50,
     norm_ci_high = estimated_reporting_probability + (1.96*se_reporting_probability),
     norm_ci_low = estimated_reporting_probability - (1.96*se_reporting_probability),
     cover_norm = norm_ci_high > true_value & norm_ci_low < true_value,
@@ -123,5 +131,4 @@ simdf %>%
 all <- list(simdf, pmeasures)
 
 qs::qsave(all, "data/pmeasures.qs")
-☺
 
