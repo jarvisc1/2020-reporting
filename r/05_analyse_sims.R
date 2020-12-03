@@ -257,22 +257,21 @@ write.csv(absdiff, file = here::here("outputs", "Table4.csv"))
 
 ## Plot of estimates within x% of true value
 
-
 absdiffplot <- simdf %>% 
   group_by(true_value, reported_outbreak_bins) %>% 
   summarise(
-    `0.05` =    sum(est_05within)/n(),
-    `0.10` =    sum(est_10within)/n(),
-    `0.15` =    sum(est_15within)/n(),
-    `0.20` =    sum(est_20within)/n()
+    `0.05` =    sum(est_05within) / n(),
+    `0.10` =    sum(est_10within) / n(),
+    `0.15` =    sum(est_15within) / n(),
+    `0.20` =    sum(est_20within) / n()
     # est_25n =    sum(est_25diff)/n(),
     # est_50n =    sum(est_50diff)/n(),
-    
-  ) 
+  )
 
 
 
-absdiff_long <- absdiffplot %>% pivot_longer(cols = c(starts_with("0."))) %>% 
+absdiff_long <- absdiffplot %>%
+  pivot_longer(cols = c(starts_with("0."))) %>% 
   mutate(name = as.numeric(name),
          value = round(value , 2))
 
@@ -394,8 +393,7 @@ absdiffplot <- simdf %>%
     `0.20` =    sum(est_20within)/n(),
     `0.21` =    sum(est_20above)/n()
     # est_25n =    sum(est_25diff)/n(),
-    # est_50n =    sum(est_50diff)/n(),
-    
+    # est_50n =    sum(est_50diff)/n(),    
   ) 
 
 
@@ -410,3 +408,24 @@ ggplot(absdiff_long) +
 
 
 
+# Figure 3 --------------------------------
+
+#fig3 <-
+
+ggplot(absdiff_long) +
+  geom_col(aes(x = name, y = value, fill = factor(true_value)),
+           position = "dodge", color = "white") +
+  facet_grid(reported_outbreak_bins ~ .) +
+  labs(x = "Absolute error", y = "Proportion of estimations") +
+  scale_x_discrete(
+    labels = paste0("\u2264",
+                    c("5%", "10%", "15%", "20%"))) +
+  theme(
+    text = element_text( size = 14)
+  ) +
+  scale_fill_manual("True reporting",
+                    values = true_val_col) +
+  scale_y_continuous(breaks = seq(0, to = 1, by = 0.2))
+
+
+ggsave(fig3, filename = here::here("outputs", "figure_3.png"), height = 10, width = 12)
