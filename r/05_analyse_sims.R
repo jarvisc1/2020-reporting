@@ -65,7 +65,7 @@ fig1 <- ggplot(simdf) +
         text = element_text( size = 14)
   )
 
-ggsave(fig1, filename = "outputs/figure_1.png", height = 10, width = 12)
+ggsave(fig1, filename = here::here("outputs", "figure_1.png"), height = 10, width = 12)
 
 
 # Zip plots ---------------------------------------------------------------
@@ -124,7 +124,7 @@ fig2 <- zip_data %>%
         plot.subtitle = element_text(hjust = 0.5, vjust = -0.1)
   ) 
 
-ggsave(fig2, filename = "outputs/figure_2.png", height = 10, width = 12)
+ggsave(fig2, filename = here::here("outputs", "figure_2.png"), height = 10, width = 12)
 
 
 # Performance measures tables ---------------------------------------------
@@ -219,11 +219,12 @@ measures_table$measure <- gsub("_", " ",
 
 tail(measures_table,20)
 
-write.csv(measures_table, file = "outputs/Table3.csv")
+write.csv(measures_table, file = here::here("outputs", "Table3.csv"))
+
+
+
 
 # Operational table -------------------------------------------------------
-
-
 
 sumprop <- function(a){
   if(sum(a)>0){
@@ -242,12 +243,11 @@ absdiff <- simdf %>%
     est_15 =    sumprop(est_15above),
     est_20 =    sumprop(est_20above),
     est_25 =    sumprop(est_25above),
-    est_50 =    sumprop(est_50above),
-            
+    est_50 =    sumprop(est_50above)            
   ) 
 
 
-write.csv(absdiff, file = "outputs/Table4.csv")
+write.csv(absdiff, file = here::here("outputs", "Table4.csv"))
 
 
 
