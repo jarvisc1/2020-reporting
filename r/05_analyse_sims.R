@@ -19,7 +19,7 @@ ggthemr("fresh")
 
 true_val_col <- c("#153B6E", "#4D5E61", "#8E7E65")
 
-all <- qs::qread('data/pmeasures.qs')
+all <- qs::qread(here::here("data", "pmeasures.qs"))
 
 simdf <- all[[1]]
 pmeasures <- all[[2]]
