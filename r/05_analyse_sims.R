@@ -410,9 +410,7 @@ ggplot(absdiff_long) +
 
 # Figure 3 --------------------------------
 
-#fig3 <-
-
-ggplot(absdiff_long) +
+fig3 <- ggplot(absdiff_long) +
   geom_col(aes(x = name, y = value, fill = factor(true_value)),
            position = "dodge", color = "white") +
   facet_grid(reported_outbreak_bins ~ .) +
