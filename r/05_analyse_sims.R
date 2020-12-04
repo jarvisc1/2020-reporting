@@ -390,8 +390,8 @@ absdiffplot <- simdf %>%
     `0.05` =    sum(est_05within)/n(),
     `0.10` =    sum(est_10within)/n(),
     `0.15` =    sum(est_15within)/n(),
-    `0.20` =    sum(est_20within)/n(),
-    `0.21` =    sum(est_20above)/n()
+    `0.20` =    sum(est_20within)/n()#,
+    #`0.21` =    sum(est_20above)/n()
     # est_25n =    sum(est_25diff)/n(),
     # est_50n =    sum(est_50diff)/n(),    
   ) 
