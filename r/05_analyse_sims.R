@@ -426,4 +426,4 @@ fig3 <- ggplot(absdiff_long) +
   scale_y_continuous(breaks = seq(0, to = 1, by = 0.2))
 
 
-ggsave(fig3, filename = here::here("outputs", "figure_3.png"), height = 10, width = 12)
+ggsave(fig3, filename = here::here("outputs", "figure_3.png"), height = 8, width = 8, dpi = 150)
