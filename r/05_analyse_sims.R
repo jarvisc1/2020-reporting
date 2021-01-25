@@ -65,7 +65,7 @@ fig1 <- ggplot(simdf) +
         text = element_text( size = 14)
   )
 
-ggsave(fig1, filename = here::here("outputs", "figure_1.png"), height = 10, width = 12)
+ggsave(fig1, filename = here::here("outputs", "figure_1.png"), height = 8, width = 10)
 
 
 # Zip plots ---------------------------------------------------------------
@@ -90,9 +90,9 @@ zip_data <- simdf %>%
 fig2 <- zip_data %>%  
   ggplot(aes(y = row_number, x = reporting_conf_low, col = covered)) +
   geom_segment(aes(yend = row_number, xend = reporting_conf_high)) +
-  facet_grid(true_value_zip ~ reported_outbreak_bins, ) +
-  scale_y_continuous(labels = function(x) x/2000, 
-                     breaks = c(0.05*2000, 0.5*2000, 0.95*2000),
+  facet_grid(true_value_zip ~ reported_outbreak_bins) +
+  scale_y_continuous(labels = function(x) x/4000, 
+                     breaks = c(0.05*4000, 0.5*4000, 0.95*4000),
                      expand=expansion(0)) + 
   scale_x_continuous(breaks = c(0.25, 0.50, 0.75)) + 
   geom_vline(aes(xintercept = true_value), col = "white") + 
@@ -124,18 +124,18 @@ fig2 <- zip_data %>%
         plot.subtitle = element_text(hjust = 0.5, vjust = -0.1)
   ) 
 
-ggsave(fig2, filename = here::here("outputs", "figure_2.png"), height = 10, width = 12)
+ggsave(fig2, filename = here::here("outputs", "figure_2.png"), height = 8, width = 10)
 
 
 # Performance measures tables ---------------------------------------------
 
 
 options(scipen=999)
-rounder <- function(a , b) {
-  paste0(round(a, 4), " (", round(b, 4), ")")
+rounder <- function(a , b, round_) {
+  paste0(round(a, round_), " (", round(b, round_), ")")
 }
-cov_rounder <- function(a , b) {
-  paste0(round(a, 4)*100, "% (", round(b, 4)*100, ")")
+cov_rounder <- function(a , b, round_) {
+  paste0(round(a, round_)*100, "% (", round(b, round_)*100, ")")
 }
 
 compare <- function(a, b){
@@ -174,35 +174,24 @@ pmeasures  %>%
   select(contains("rel"))
 
 measures_df <- pmeasures %>% 
-  mutate(bias = rounder(bias_mean, bias_mcse), 
-         coverage = cov_rounder(coverage, coverage_mcse),
-         coverage_norm = cov_rounder(coverage_norm, coverage_mcse),
+  mutate(bias = rounder(bias_mean, bias_mcse, 2), 
+         coverage = cov_rounder(coverage, coverage_mcse, 3),
+         empirical_se = rounder(emp_se, emp_se_mcse,3),
+         model_se = rounder(mod_se_bias, mod_se_bias_mcse,3),
+         model_ratio = rounder(mod_se_err, 0, 3),
+         root_mean_squared_error = rounder(rmse, rmse_mcse,3),
+         coverage_norm = cov_rounder(coverage_norm, coverage_mcse, 2),
          coverage_t = cov_rounder(coverage_t, coverage_mcse),
          coverage_wilson = cov_rounder(coverage_wilson, coverage_mcse),
          coverage_asymp = cov_rounder(coverage_asymp, coverage_mcse),
          coverage_probit = cov_rounder(coverage_probit, coverage_mcse),
          coverage_ac = cov_rounder(coverage_ac, coverage_mcse),
-         coverage_lrt = cov_rounder(coverage_lrt, coverage_mcse),
-         empirical_se = rounder(emp_se, emp_se_mcse),
-         model_se = rounder(mod_se_bias, mod_se_bias_mcse),
-         model_ratio = rounder(mod_se_err, 0),
-         root_mean_squared_error = rounder(rmse, rmse_mcse)
+         coverage_lrt = cov_rounder(coverage_lrt, coverage_mcse)
   ) %>% 
   select(true_value, 
          reported_outbreak_bins,
          bias,
-         coverage,
-         coverage_norm,
-         coverage_t,
-         coverage_wilson,
-         coverage_asymp,
-         coverage_probit,
-         coverage_ac,
-         coverage_lrt,
-         root_mean_squared_error,
-         empirical_se,
-         model_se,
-         model_ratio
+         coverage
   )
 
 measures_table <- measures_df %>% 
@@ -217,6 +206,7 @@ measures_table$measure <- gsub("_", " ",
                                paste0(measures_table$measure))
 
 
+head(measures_table,20)
 tail(measures_table,20)
 
 write.csv(measures_table, file = here::here("outputs", "Table3.csv"))
@@ -227,23 +217,22 @@ write.csv(measures_table, file = here::here("outputs", "Table3.csv"))
 # Operational table -------------------------------------------------------
 
 sumprop <- function(a){
-  if(sum(a)>0){
-    paste0(sum(a), " (", round(sum(a)/n()*100,2),"%)" )
+  if(sum(a)<4000){
+    paste0(sum(a), " (", round(sum(a)/n()*100,1),"%)" )
   }else{
-    "0"
+    "4000"
   }
 }
 
 simdf
+
 absdiff <- simdf %>% 
   group_by(true_value, reported_outbreak_bins) %>% 
   summarise(
-    est_05 =    sumprop(est_05above),
-    est_10 =    sumprop(est_10above),
-    est_15 =    sumprop(est_15above),
-    est_20 =    sumprop(est_20above),
-    est_25 =    sumprop(est_25above),
-    est_50 =    sumprop(est_50above)            
+    est_05 =    sumprop(est_05within),
+    est_10 =    sumprop(est_10within),
+    est_15 =    sumprop(est_15within),
+    est_20 =    sumprop(est_20within),
   ) 
 
 
