@@ -191,7 +191,9 @@ measures_df <- pmeasures %>%
   select(true_value, 
          reported_outbreak_bins,
          bias,
-         coverage
+         coverage,
+         empirical_se,
+         model_se
   )
 
 measures_table <- measures_df %>% 
