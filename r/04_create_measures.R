@@ -9,15 +9,23 @@ library(dplyr)
 ## epitools
 ## binom
 
+# Set scenario reference ---------------------------------------------
 
-# Source user written scripts ---------------------------------------------
+if(!exists("scenario_ref")) {
+  scenario_ref <- "r_mean_2_11"
+  
+  # Create_paths ---------------------------------------------
+  scenario_path <- file.path("scenarios", scenario_ref)
+  data_path <- file.path("data", "processing", scenario_path)
+  outputs_path <- file.path("outputs", scenario_path)
+  dir.create(data_path, showWarnings = F)
+  dir.create(outputs_path, showWarnings = F)
+}
 
+# Read data ---------------------------------------------
+simdf <- qs::qread(file.path(data_path, "sim_results_combined.qs"))
 
-# Read data ---------------------------------------------------------------
-
-simdf <- qs::qread("data/sim_results_combined.qs")
-
-
+# Clean data ---------------------------------------------
 fct_lvls <-   c("10-99", "100-499", "500-999", "1000+")
 
 simdf$reported_outbreak_bins <- factor(
@@ -130,5 +138,6 @@ simdf %>%
 
 all <- list(simdf, pmeasures)
 
-qs::qsave(all, "data/pmeasures.qs")
+qs::qsave(all, file.path(data_path, "pmeasures.qs"))
+print(paste("Saved to: ", file.path(data_path, "pmeasures.qs")))
 

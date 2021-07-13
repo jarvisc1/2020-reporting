@@ -9,21 +9,29 @@ library(dplyr)
 library(ggplot2)
 library(ggthemr)
 library(tidyr)
-
-# library(binom)
-
-
-# Source user written scripts ---------------------------------------------
-
 ggthemr("fresh")
 
-true_val_col <- c("#153B6E", "#4D5E61", "#8E7E65")
+# Set scenario reference ---------------------------------------------
+if(!exists("scenario_ref")) {
+  scenario_ref <- "r_mean_2_11"
+  
+  # Create_paths ---------------------------------------------
+  scenario_path <- file.path("scenarios", scenario_ref)
+  data_path <- file.path("data", "processing",  scenario_path)
+  outputs_path <- file.path("outputs", scenario_path)
+  dir.create(data_path, showWarnings = F)
+  dir.create(outputs_path, showWarnings = F)
+}
 
-all <- qs::qread(here::here("data", "pmeasures.qs"))
+
+
+
+all <- qs::qread(here::here(data_path, "pmeasures.qs"))
 
 simdf <- all[[1]]
 pmeasures <- all[[2]]
 
+true_val_col <- c("#153B6E", "#4D5E61", "#8E7E65")
 
 # Figure one --------------------------------------------------------------
 
@@ -65,7 +73,7 @@ fig1 <- ggplot(simdf) +
         text = element_text( size = 14)
   )
 
-ggsave(fig1, filename = here::here("outputs", "figure_1.png"), height = 8, width = 10)
+ggsave(fig1, filename = here::here(outputs_path, "figure_1.png"), height = 8, width = 10)
 
 
 # Zip plots ---------------------------------------------------------------
@@ -124,7 +132,7 @@ fig2 <- zip_data %>%
         plot.subtitle = element_text(hjust = 0.5, vjust = -0.1)
   ) 
 
-ggsave(fig2, filename = here::here("outputs", "figure_2.png"), height = 8, width = 10)
+ggsave(fig2, filename = here::here(outputs_path, "figure_2.png"), height = 8, width = 10)
 
 
 # Performance measures tables ---------------------------------------------
@@ -211,7 +219,7 @@ measures_table$measure <- gsub("_", " ",
 head(measures_table,20)
 tail(measures_table,20)
 
-write.csv(measures_table, file = here::here("outputs", "Table3.csv"))
+write.csv(measures_table, file = here::here(outputs_path, "Table3.csv"))
 
 
 
@@ -238,7 +246,7 @@ absdiff <- simdf %>%
   ) 
 
 
-write.csv(absdiff, file = here::here("outputs", "Table4.csv"))
+write.csv(absdiff, file = here::here(outputs_path, "Table4.csv"))
 
 
 
@@ -417,4 +425,9 @@ fig3 <- ggplot(absdiff_long) +
   scale_y_continuous(breaks = seq(0, to = 1, by = 0.2))
 
 
-ggsave(fig3, filename = here::here("outputs", "figure_3.png"), height = 8, width = 8, dpi = 150)
+ggsave(fig3, filename = here::here(outputs_path, "figure_3.png"), 
+       height = 8, 
+       width = 8, 
+       dpi = 150)
+
+print(paste("Saved to:", outputs_path))

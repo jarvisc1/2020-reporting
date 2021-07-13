@@ -14,7 +14,17 @@ library(simulacr)
 source('r/functions/create_reported_cases_list.R')
 source('r/functions/simulate_reported_cases_unique.R')
 source('r/functions/remove_n_cases_tidyverse.R')
-
+# scenario_ref <- NULL
+if(!exists("scenario_ref")) {
+  scenario_ref <- "r_mean_2_11"
+  
+  # Create_paths ---------------------------------------------
+  scenario_path <- file.path("scenarios", scenario_ref)
+  data_path <- file.path("data", "processing", scenario_path)
+  dir.create(data_path, showWarnings = F)
+  outputs_path <- file.path("outputs", scenario_path)
+  dir.create(outputs_path, showWarnings = F)
+}
 
 # Define simulation settings ----------------------------------------------
 
@@ -24,8 +34,9 @@ seed <- 765
 # Then take the specific simulation
 # Then filter by the outbreak days? Probs not needed. 
 # Then remove cases according to the 3 levels
+# data_path <- "data/processing/scenarios/r_mean_1_36"
 
-raw_sims <- list.files(path = "data/processing", pattern = "raw_sim", 
+raw_sims <- list.files(path = data_path, pattern = "raw_sim", 
                        full.names = TRUE)
 raw_sims_filenames <- raw_sims
 
@@ -68,11 +79,12 @@ for (i in 1:length(raw_sims)) {
   combined_results$seed <- seed
   timestring <- format(Sys.time(), "%d_%m_%s")
 
-  results_filename <- paste0("data/processing/sim_results_", 
+  results_filename <- file.path(data_path, paste0(
+                             "sim_results_", 
                              current_name ,
                              "_", 
                              timestring,
-                             ".qs")
+                             ".qs"))
   qs::qsave(combined_results, results_filename)
   print(results_filename)
 }
