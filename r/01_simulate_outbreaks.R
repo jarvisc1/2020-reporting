@@ -31,14 +31,11 @@ print(r_dist_mean_label)
 
 # Define changing values --------------------------------------------------
 
-# population_sizes <- c(200, 500, 1000, 2000, 5000, 10000, 15000, 20000)
-population_sizes <- c( 20000)
+population_sizes <- c(200, 500, 1000, 2000, 5000, 10000, 15000, 20000)
 
 outbreak_ranges <- c("10-200", "10-500", "10-1000", "10-2000", "10-5000",
                       "100-10000", "100-15000", "100-20000")
 
-##population_sizes <- c(200, 2000)
-##outbreak_ranges <- c("10-200", "10-2000")
 
 
 all_simulations_list <- list()
