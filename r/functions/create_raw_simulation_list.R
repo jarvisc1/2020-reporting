@@ -9,11 +9,11 @@ create_raw_simulation_list <- function(
   ## Create Infectious Period Distribution (FIXED)
   inf_mu <- 5 # mean in days
   inf_sd <- 4.7 # standard deviation in days
-  infectious_period <- make_disc_gamma(inf_mu, inf_sd)
+  infectious_period <- simulacr::make_disc_gamma(inf_mu, inf_sd)
   ## Create Incubation Period Distribution (FIXED)
   inc_mu <- 9.7 # mean in days
   inc_sd <- 5.5 # standard deviation in days
-  incubation <- make_disc_gamma(inc_mu, inc_sd)
+  incubation <- simulacr::make_disc_gamma(inc_mu, inc_sd)
   ## Create Reproduction Number Distribution (PARAMETER)
   r_dist <- sample(r_dist_list, 1)[[1]]
   if (r_dist[1] < 1) { r_dist <- sample(r_dist_list, 1)[[1]] }
